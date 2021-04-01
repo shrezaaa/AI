@@ -29,7 +29,7 @@ class Unit:
             items.rotate(1)
             pools.append(list(items))
         # print(pools)
-        return 1
+        return pools
 
 
 class Interval:
@@ -58,6 +58,7 @@ def readFilesAndCreateObjects():
 
 def main() :
     readFilesAndCreateObjects()
+    print(unitArray[0].unitPools)
 
 
 
