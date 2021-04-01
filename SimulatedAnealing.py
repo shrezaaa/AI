@@ -1,29 +1,66 @@
+from collections import deque
 
+global unitCounts
+global intervalCounts
 
+global unitArray
+unitArray = []
+
+global intervalsArray
+intervalsArray = []
 class Unit:
-    def __init__(self, id, capacity, repairCount):
-        self.unitID = id
-        self.unitCapacity = capacity
-        self.unitRepairCount = repairCount
-        self.unitPools = self.genreatePools()
+    def __init__(self, id, capacity, repairCount,intervalsCount):
+        self.unitID = int(id)
+        self.unitCapacity = int(capacity)
+        self.unitRepairCount = int(repairCount)
+        self.unitPools = self.genreatePools(self.unitRepairCount,intervalsCount)
 
-    def genreatePools(self):
-        return
+    def genreatePools(self,reapirCount,intervals):
+        pools = []
+        tempArray = []
+        for x in range(reapirCount):
+            tempArray.append(1)
+        for x in range(intervals-reapirCount):
+            tempArray.append(0)
+
+        pools.append(tempArray)
+        items = deque(tempArray)
+        for x in range(intervals-reapirCount):
+            items.rotate(1)
+            pools.append(list(items))
+        # print(pools)
+        return 1
 
 
 class Interval:
     def __init__(self, id, demand):
-        self.intervalID = id
-        self.intervalDemand = demand
+        self.intervalID = int(id)
+        self.intervalDemand = int(demand)
 
 
-class order:
-    def generate_period_unit_states(period_count: int, period_works_count: int):
-        state_list = []
-        for i in range(pow(2, period_count)):
-            state = bin(i)[2:]
-            state = str(0) * (period_count - len(state)) + state
-            if state.count('1') == period_works_count and state.contains(str(1) * period_works_count):
-                state_list.append(state)
-        return state_list
+def readFilesAndCreateObjects():
+    secondFile = open("second.txt", 'rt')
+    lines = secondFile.read().split('\n')
+    intervalCounts = int(lines.pop(0))
+    for line in lines:
+        res = line.split(',')
+        intervalsArray.append(Interval(res[0], res[1]))
+    secondFile.close()
 
+    firstFile = open("first.txt", "rt")
+    lines = firstFile.read().split('\n')
+    unitCounts = int(lines.pop(0))
+    for line in lines:
+        res = line.split(',')
+        unitArray.append(Unit(res[0], res[1], res[2], intervalCounts))
+    firstFile.close()
+
+
+def main() :
+    readFilesAndCreateObjects()
+
+
+
+
+
+main()
