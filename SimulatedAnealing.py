@@ -12,9 +12,6 @@ unitArray = []
 global intervalsArray
 intervalsArray = []
 
-global orderList
-orderList = []
-
 class Unit:
     def __init__(self, id, capacity, repairCount,intervalsCount):
         self.unitID = int(id)
@@ -44,11 +41,6 @@ class Interval:
         self.intervalID = int(id)
         self.intervalDemand = int(demand)
 
-class solution:
-    def __init__(self,orderList:list,demand:int):
-        self.orderList = orderList
-        self.demand = demand
-
 class Solution:
     def __init__(self,orderList:list,minimumExtraCapacity:int):
         self.orderList = orderList
@@ -71,117 +63,112 @@ def readFilesAndCreateObjects():
         unitArray.append(Unit(res[0], res[1], res[2], intervalCounts))
     firstFile.close()
 
-def calcIntervalExtraCapacity(orderList:[],intervalIndex:int):
+def calcIntervalNeededCapacity(orderList:[], intervalIndex:int):
     sum = 0
-    for index in range(len(unitArray)):
-        if orderList[index][intervalIndex] == 0 :
-            sum = sum + unitArray[index].unitCapacity
+    for unitIndex in range(len(unitArray)):
+        if orderList[unitIndex][intervalIndex] == 0 :
+            sum = sum + unitArray[unitIndex].unitCapacity
     return sum - intervalsArray[intervalIndex].intervalDemand
 
 
 def acceptanceProbability(currentMinimumExtraCapacity,neighbourMinimumExtraCapacity,temp):
-    if neighbourMinimumExtraCapacity > currentMinimumExtraCapacity :
+    if currentMinimumExtraCapacity < neighbourMinimumExtraCapacity :
         return 1.0
-    # print(((neighbourDemand - currentDemand)/temp))
-    # return ((neighbourDemand - currentDemand)/temp)
-    return 0
+    return (math.exp(neighbourMinimumExtraCapacity - currentMinimumExtraCapacity)/temp)
 
 def fillOrders():
     orderList = []
     for unit in unitArray:
         orderList.append(secrets.choice(unit.unitPools))
-    print(orderList)
     return orderList
 
 
-def calcDemandsInOrders(orderList):
-    demand = 0
+def calcAllNeededInOrders(orderList):
+    neededCapcacity = 0
     for index in range(len(intervalsArray)):
-        extraCapacity = calcIntervalExtraCapacity(orderList,index)
+        extraCapacity = calcIntervalNeededCapacity(orderList, index)
         if extraCapacity < 0 :
-            demand = demand + extraCapacity
-        print(str(index) + " extra capacity is " + str((calcIntervalExtraCapacity(orderList,index))))
-    return demand
+            neededCapcacity = neededCapcacity + extraCapacity
+        print(str(index) + " extra capacity is " + str((calcIntervalNeededCapacity(orderList, index))))
+    return neededCapcacity
 
 def findMinimumIntervalCapacityInOrders(orderList):
-    minimum = calcIntervalExtraCapacity(orderList,0)
+    minimum = calcIntervalNeededCapacity(orderList, 0)
     minimumInterval:int
     minimumIntervalsList = []
-    for index in range(len(intervalsArray)):
-        extraCapacity = calcIntervalExtraCapacity(orderList,index)
+    for intervalIndex in range(len(intervalsArray)):
+        extraCapacity = calcIntervalNeededCapacity(orderList, intervalIndex)
         if extraCapacity < minimum :
             minimum = extraCapacity
-            minimumInterval = index
+            minimumInterval = intervalIndex
             minimumIntervalsList = []
         elif extraCapacity == minimum :
-            minimumIntervalsList.append(index)
+            minimumIntervalsList.append(intervalIndex)
     if len(minimumIntervalsList)!=0:
         minimumIntervalsList.append(minimumInterval)
         minimumInterval = secrets.choice(minimumIntervalsList)
+    minimumIntervalsList = []
     return minimumInterval
 
-def findNeighbourOrderList(orderList):
-    newOrder = orderList.copy()
-    minimumInterval = findMinimumIntervalCapacityInOrders(orderList);
-    print(minimumInterval)
+def findNeighbourOrderList(orderList,minimumInterval):
+    newOrderList = orderList.copy()
     disabledUnits= []
-    for unitIndex in range(len(orderList)):
-        if orderList[unitIndex][minimumInterval] == 1:
+    for unitIndex in range(len(newOrderList)):
+        if newOrderList[unitIndex][minimumInterval] == 1:
             disabledUnits.append(unitIndex)
-    print(disabledUnits)
-    if len(disabledUnits)!=0:
-        selectedUnit = secrets.choice(disabledUnits)
-        selectableUnitPools=[]
-        print(selectedUnit)
+    selectableUnitPools=[]
+    selectedUnit = secrets.choice(disabledUnits)
 
-    for unitPool in unitArray[selectedUnit].unitPools:
-        if unitPool[minimumInterval] == 0:
-            selectableUnitPools.append(unitPool)
-    if len(selectableUnitPools)!=0:
-        selectedUnitPool = secrets.choice(selectableUnitPools)
-        print(selectedUnitPool)
-        newOrder[selectedUnit] = selectedUnitPool
-    minimumInterval = findMinimumIntervalCapacityInOrders(newOrder);
-    minimumValue = calcIntervalExtraCapacity(newOrder,minimumInterval)
+    if selectedUnit:
+        for unitPool in unitArray[selectedUnit].unitPools:
+            if unitPool[minimumInterval] == 0:
+                selectableUnitPools.append(unitPool)
+        if len(selectableUnitPools)!=0:
+            selectedUnitPool = secrets.choice(selectableUnitPools)
+            newOrderList[selectedUnit] = selectedUnitPool
+    newMinimumInterval = findMinimumIntervalCapacityInOrders(newOrderList);
+    minimumValue = calcIntervalNeededCapacity(newOrderList, newMinimumInterval)
 
-    solution = Solution(newOrder,minimumValue)
+    solution = Solution(newOrderList,minimumValue)
     return solution
 
 def main() :
     readFilesAndCreateObjects()
     orderList = fillOrders()
-    minimumInterval = findMinimumIntervalCapacityInOrders(orderList);
-    minimumValue = calcIntervalExtraCapacity(orderList, minimumInterval)
+    minimumInterval = findMinimumIntervalCapacityInOrders(orderList)
+    minimumValue = calcIntervalNeededCapacity(orderList, minimumInterval)
+    global currentSolution
+    global bestSolution
     currentSolution = Solution(orderList,minimumValue)
+    bestSolution = currentSolution
     print(currentSolution.orderList)
-    print(calcDemandsInOrders(currentSolution.orderList))
+    print("all needed " + str(calcAllNeededInOrders(currentSolution.orderList)))
     print()
+
     temp = 1000
-    colingRate = 200
+    colingRate = 1
 
     while(temp > 1 ):
-        # orderList = fillOrders()
-        # demand = calcDemandsInOrders(orderList)
-        # newSolution = solution(orderList,demand)
-        # if acceptanceProbability(currentSolution.demand,newSolution.demand,temp) > random():
-        #     print('true')
-        #     currentSolution = newSolution
-
-        newSolution = findNeighbourOrderList(currentSolution.orderList)
+        minimumInterval = findMinimumIntervalCapacityInOrders(currentSolution.orderList);
+        newSolution = findNeighbourOrderList(currentSolution.orderList,minimumInterval)
         print(newSolution.orderList)
-        print(calcDemandsInOrders(newSolution.orderList))
+        print("all needed " + str(calcAllNeededInOrders(newSolution.orderList)))
+        print("Minimum Extra is " + str(newSolution.minimumExtraCapacity))
         if acceptanceProbability(currentSolution.minimumExtraCapacity,newSolution.minimumExtraCapacity,temp) > random():
             print('true')
             currentSolution = newSolution
+
+        if bestSolution.minimumExtraCapacity < newSolution.minimumExtraCapacity:
+            bestSolution = newSolution
+
         print()
         temp = temp - colingRate
 
-    # soooo this is solution
+    # so this is answer solution
     print()
     print("answer is")
-    print(currentSolution.orderList)
-    print(calcDemandsInOrders(orderList))
-    print("Minimum Extra is " + str(currentSolution.minimumExtraCapacity))
-    # print(findMinimumIntervalCapacityInOrders(currentSolution.orderList))
-    # findNeighbourOrderList(currentSolution.orderList)
+    print(bestSolution.orderList)
+    print("all needed " + str(calcAllNeededInOrders(bestSolution.orderList)))
+    print("Minimum Extra is " + str(bestSolution.minimumExtraCapacity))
+
 main()
