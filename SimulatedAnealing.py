@@ -71,6 +71,13 @@ def calcIntervalNeededCapacity(orderList:[], intervalIndex:int):
     return sum - intervalsArray[intervalIndex].intervalDemand
 
 
+def calcIntervalExactCapacity(orderList:[], intervalIndex:int):
+    sum = 0
+    for unitIndex in range(len(unitArray)):
+        if orderList[unitIndex][intervalIndex] == 0 :
+            sum = sum + unitArray[unitIndex].unitCapacity
+    return sum
+
 def acceptanceProbability(currentMinimumExtraCapacity,neighbourMinimumExtraCapacity,temp):
     if currentMinimumExtraCapacity < neighbourMinimumExtraCapacity :
         return 1.0
@@ -89,12 +96,12 @@ def calcAllNeededInOrders(orderList):
         extraCapacity = calcIntervalNeededCapacity(orderList, index)
         if extraCapacity < 0 :
             neededCapcacity = neededCapcacity + extraCapacity
-        print(str(index) + " extra capacity is " + str((calcIntervalNeededCapacity(orderList, index))))
+        print(str(index) +" Exact Capacity is "+ str(calcIntervalExactCapacity(orderList, index)) + " & Extra Capacity is " + str((calcIntervalNeededCapacity(orderList, index))))
     return neededCapcacity
 
 def findMinimumIntervalCapacityInOrders(orderList):
+    minimumInterval=-1
     minimum = calcIntervalNeededCapacity(orderList, 0)
-    minimumInterval:int
     minimumIntervalsList = []
     for intervalIndex in range(len(intervalsArray)):
         extraCapacity = calcIntervalNeededCapacity(orderList, intervalIndex)
@@ -105,7 +112,8 @@ def findMinimumIntervalCapacityInOrders(orderList):
         elif extraCapacity == minimum :
             minimumIntervalsList.append(intervalIndex)
     if len(minimumIntervalsList)!=0:
-        minimumIntervalsList.append(minimumInterval)
+        if minimumInterval > -1 :
+            minimumIntervalsList.append(minimumInterval)
         minimumInterval = secrets.choice(minimumIntervalsList)
     minimumIntervalsList = []
     return minimumInterval
@@ -146,7 +154,7 @@ def main() :
     print()
 
     temp = 1000
-    colingRate = 1
+    colingRate = 10
 
     while(temp > 1 ):
         minimumInterval = findMinimumIntervalCapacityInOrders(currentSolution.orderList);
