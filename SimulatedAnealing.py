@@ -81,7 +81,8 @@ def calcIntervalExactCapacity(orderList:[], intervalIndex:int):
 def acceptanceProbability(currentMinimumExtraCapacity,neighbourMinimumExtraCapacity,temp):
     if currentMinimumExtraCapacity < neighbourMinimumExtraCapacity :
         return 1.0
-    return (math.exp(neighbourMinimumExtraCapacity - currentMinimumExtraCapacity)/temp)
+    print(math.exp((neighbourMinimumExtraCapacity - currentMinimumExtraCapacity)/temp))
+    return math.exp((neighbourMinimumExtraCapacity - currentMinimumExtraCapacity)/temp)
 
 def fillOrders():
     orderList = []
