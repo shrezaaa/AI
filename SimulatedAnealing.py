@@ -63,7 +63,7 @@ def readFilesAndCreateObjects():
         unitArray.append(Unit(res[0], res[1], res[2], intervalCounts))
     firstFile.close()
 
-def calcIntervalNeededCapacity(orderList:[], intervalIndex:int):
+def calcIntervalExtraCapacity(orderList:[], intervalIndex:int):
     sum = 0
     for unitIndex in range(len(unitArray)):
         if orderList[unitIndex][intervalIndex] == 0 :
@@ -94,18 +94,18 @@ def fillOrders():
 def calcAllNeededInOrders(orderList):
     neededCapcacity = 0
     for index in range(len(intervalsArray)):
-        extraCapacity = calcIntervalNeededCapacity(orderList, index)
+        extraCapacity = calcIntervalExtraCapacity(orderList, index)
         if extraCapacity < 0 :
             neededCapcacity = neededCapcacity + extraCapacity
-        print(str(index) +" Exact Capacity is "+ str(calcIntervalExactCapacity(orderList, index)) + " & Extra Capacity is " + str((calcIntervalNeededCapacity(orderList, index))))
+        print(str(index) +" Exact Capacity is "+ str(calcIntervalExactCapacity(orderList, index)) + " & Extra Capacity is " + str((calcIntervalExtraCapacity(orderList, index))))
     return neededCapcacity
 
 def findMinimumIntervalCapacityInOrders(orderList):
     minimumInterval=-1
-    minimum = calcIntervalNeededCapacity(orderList, 0)
+    minimum = calcIntervalExtraCapacity(orderList, 0)
     minimumIntervalsList = []
     for intervalIndex in range(len(intervalsArray)):
-        extraCapacity = calcIntervalNeededCapacity(orderList, intervalIndex)
+        extraCapacity = calcIntervalExtraCapacity(orderList, intervalIndex)
         if extraCapacity < minimum :
             minimum = extraCapacity
             minimumInterval = intervalIndex
@@ -136,7 +136,7 @@ def findNeighbourOrderList(orderList,minimumInterval):
             selectedUnitPool = secrets.choice(selectableUnitPools)
             newOrderList[selectedUnit] = selectedUnitPool
     newMinimumInterval = findMinimumIntervalCapacityInOrders(newOrderList);
-    minimumValue = calcIntervalNeededCapacity(newOrderList, newMinimumInterval)
+    minimumValue = calcIntervalExtraCapacity(newOrderList, newMinimumInterval)
 
     solution = Solution(newOrderList,minimumValue)
     return solution
@@ -145,7 +145,7 @@ def main() :
     readFilesAndCreateObjects()
     orderList = fillOrders()
     minimumInterval = findMinimumIntervalCapacityInOrders(orderList)
-    minimumValue = calcIntervalNeededCapacity(orderList, minimumInterval)
+    minimumValue = calcIntervalExtraCapacity(orderList, minimumInterval)
     global currentSolution
     global bestSolution
     currentSolution = Solution(orderList,minimumValue)
