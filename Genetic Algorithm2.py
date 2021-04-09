@@ -142,7 +142,7 @@ class Algorithm:
         newPopulation = Population(pop.size,'false')
 
         # keep the best
-        if self.elitism=='true':
+        if self.elitism == 'true':
             newPopulation.saveIndividual(0,pop.getFittestInPop())
 
         # crossover Population
@@ -151,18 +151,16 @@ class Algorithm:
         else :
             self.elitismOffset = 0;
 
-        #crossover
-
+        # crossover
+        # tested
         for i in range(self.elitismOffset,pop.size,1):
             indiv1 = self.tournamentSelection(pop)
             indiv2 = self.tournamentSelection(pop)
             newIndiv = self.crossover(indiv1,indiv2)
             newPopulation.saveIndividual(i,newIndiv)
-            # print(str(i) + " is")
-            # printIndividuals(newIndiv)
-        # print('changed')
-        # printIndividuals(newPopulation.individulas)
 
+        # mutate
+        # tested
         for i in range(self.elitismOffset,pop.size,1):
             mutatedIndiv = self.mutate(newPopulation.getIndividual(i))
             newPopulation.saveIndividual(i,mutatedIndiv)
@@ -179,6 +177,7 @@ class Algorithm:
                 newIndiv[i] = indiv2[i]
         return newIndiv
 
+    # tested
     def mutate(self,indiv):
         for i in range(len(indiv)):
             if random() <=  self.mutationRate:
@@ -193,12 +192,6 @@ class Algorithm:
             tournomentPop.saveIndividual(i,pop.getIndividual(randomID))
 
         fittest = tournomentPop.getFittestInPop()
-        # print(tournomentPop.individulas[0])
-        # print(tournomentPop.individulas[1])
-        # print(self.crossover(tournomentPop.individulas[0],tournomentPop.individulas[1]))
-
-        #  for test
-        # print(tournomentPop.calcAllNeededInOrders(fittest))
         return fittest
 
 
@@ -224,19 +217,8 @@ def printPop(pop:Population,number):
 def main() :
     readFilesAndCreateObjects()
     pop = Population(10,'true')
-    # printIndividuals(pop.individulas)
-
-    # printPop(pop,1)
-
-    # print(pop.getFittestInPop())
-    # print(pop.getFittestFitnessRate())
-    algorithm = Algorithm(0.5,0.015,5,'true')
+    algorithm = Algorithm(0.7,0.5,4,'true')
     newPop = algorithm.evelopePopulation(pop)
-    # print(algorithm.mutate(pop.individulas[9]))
-    # algorithm.tournamentSelection(pop)
-    # print(pop.getFittestInPop())
-    # print(pop.calcAllNeededInOrders(pop.getFittestInPop()))
-
     generationCount = 100
     for generationIndex in range(generationCount):
         if pop.getFittestFitnessRate() <= newPop.getFittestFitnessRate():
